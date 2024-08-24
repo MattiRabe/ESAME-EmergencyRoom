@@ -1,10 +1,16 @@
 package it.polito.emergency;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class EmergencyApp {
+
+    TreeMap<String , Professional> professionals = new TreeMap<>();
+    TreeMap<String , Department> departments = new TreeMap<>();
 
     public enum PatientStatus {
         ADMITTED,
@@ -23,7 +29,7 @@ public class EmergencyApp {
      * @param workingHours
      */
     public void addProfessional(String id, String name, String surname, String specialization, String period) {
-        //TODO: to be implemented
+        professionals.put(id, new Professional(id, name, surname, specialization, period));
     }
 
     /**
@@ -34,8 +40,8 @@ public class EmergencyApp {
      * @throws EmergencyException If no professional is found.
      */    
     public Professional getProfessionalById(String id) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        if(!professionals.containsKey(id)) throw new EmergencyException();
+        return professionals.get(id);
     }
 
     /**
@@ -46,8 +52,11 @@ public class EmergencyApp {
      * @throws EmergencyException If no professionals are found with the specified specialization.
      */    
     public List<String> getProfessionals(String specialization) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        List<String> l = professionals.values().stream().filter(p->p.getSpecialization().equals(specialization))
+        .map(Professional::getId).collect(Collectors.toList());
+
+        if(l.size()==0) throw new EmergencyException();
+        return l;
     }
 
     /**
@@ -59,8 +68,12 @@ public class EmergencyApp {
      * @throws EmergencyException If no professionals are found with the specified specialization and period.
      */    
     public List<String> getProfessionalsInService(String specialization, String period) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        List<String> l = professionals.values().stream().filter(p->p.getSpecialization().equals(specialization))
+        .filter(p->p.isInService(period)==true)
+        .map(Professional::getId).collect(Collectors.toList());
+
+        if(l.size()==0) throw new EmergencyException();
+        return l;
     }
 
     /**
@@ -71,7 +84,7 @@ public class EmergencyApp {
      * @throws EmergencyException If the department already exists.
      */
     public void addDepartment(String name, int maxPatients) {
-        //TODO: to be implemented
+        departments.put(name, new Department(name, maxPatients));
     }
 
     /**
@@ -81,8 +94,9 @@ public class EmergencyApp {
      * @throws EmergencyException If no departments are found.
      */
     public List<String> getDepartments() throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        List<String> l = departments.values().stream().map(Department::getName).collect(Collectors.toList());
+        if(l.size()==0) throw new EmergencyException();
+        return l;
     }
 
     /**
@@ -95,8 +109,20 @@ public class EmergencyApp {
      * @throws IOException If there is an error reading from the file or if the reader is null.
      */
     public int readFromFileProfessionals(Reader reader) throws IOException {
-        //TODO: to be implemented
-        return -1;
+        if(reader==null) throw new IOException();
+        int tot = 0;
+        try(BufferedReader bf = new BufferedReader(reader)){
+            String line;
+            while((line=bf.readLine())!=null){
+                String[] prof = line.split(",");
+                professionals.put(prof[0], new Professional(prof[0], prof[1], prof[2], prof[3], prof[4]));
+                tot++;
+            }
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
+
+        return tot;
     }
 
     /**
@@ -109,8 +135,17 @@ public class EmergencyApp {
      * @throws IOException If there is an error reading from the file or if the reader is null.
      */    
     public int readFromFileDepartments(Reader reader) throws IOException {
-        //TODO: to be implemented
-        return -1;
+        if(reader==null) throw new IOException();
+        int tot = 0;
+        try(BufferedReader bf = new BufferedReader(reader)){
+            String line;
+            while((line=bf.readLine())!=null){
+                String[] prof = line.split(",");
+                departments.put(prof[0], new Department(prof[0], Integer.parseInt(prof[1])));
+                tot++;
+            }
+        }
+        return tot;
     }
 
     /**
