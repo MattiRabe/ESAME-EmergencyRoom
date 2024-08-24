@@ -3,14 +3,18 @@ package it.polito.emergency;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class EmergencyApp {
 
     TreeMap<String , Professional> professionals = new TreeMap<>();
     TreeMap<String , Department> departments = new TreeMap<>();
+    TreeMap<String , Patient> patients = new TreeMap<>();
+    TreeMap<Integer , Report> reports = new TreeMap<>();
 
     public enum PatientStatus {
         ADMITTED,
@@ -159,8 +163,10 @@ public class EmergencyApp {
      * @param dateTimeAccepted The date and time the patient was accepted into the emergency system.
      */
     public Patient addPatient(String fiscalCode, String name, String surname, String dateOfBirth, String reason, String dateTimeAccepted) {
-        //TODO: to be implemented
-        return null;
+        if(patients.containsKey(fiscalCode)) return patients.get(fiscalCode);
+        patients.put(fiscalCode, new Patient(fiscalCode, name, surname, dateOfBirth, reason, dateTimeAccepted));
+        patients.get(fiscalCode).setStatus(PatientStatus.ADMITTED);
+        return patients.get(fiscalCode);
     }
 
     /**
@@ -171,8 +177,9 @@ public class EmergencyApp {
      *         Returns an empty collection if no match is found.
      */    
     public List<Patient> getPatient(String identifier) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        List<Patient> lFisc = patients.values().stream().filter(p->p.getFiscalCode().equals(identifier)).collect(Collectors.toList());
+        if(lFisc.size()!=0) return lFisc;
+        return patients.values().stream().filter(p->p.getSurname().equals(identifier)).collect(Collectors.toList());
     }
 
     /**
@@ -184,8 +191,9 @@ public class EmergencyApp {
      *         Returns an empty list if no patients were accepted on that date.
      */
     public List<String> getPatientsByDate(String date) {
-        //TODO: to be implemented
-        return null;
+         return patients.values().stream().filter(p->p.getDateTimeAccepted().equals(date))
+         .sorted(Comparator.comparing(Patient::getSurname).thenComparing(Patient::getName))
+         .map(Patient::getFiscalCode).collect(Collectors.toList());
     }
 
     /**
@@ -197,13 +205,20 @@ public class EmergencyApp {
      * @throws EmergencyException If the patient does not exist, if no professionals with the required specialization are found, or if none are available during the period of the request.
      */
     public String assignPatientToProfessional(String fiscalCode, String specialization) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        if(!patients.containsKey(fiscalCode)) throw new EmergencyException();
+        List<Professional> prof = professionals.values().stream().filter(p->p.getSpecialization().equals(specialization))
+        .filter(p->p.isInService2(patients.get(fiscalCode).getDateTimeAccepted())).collect(Collectors.toList());
+
+        if(prof.size()==0) throw new EmergencyException();
+        prof.get(0).addPatient(patients.get(fiscalCode));
+        return prof.get(0).getId();
     }
 
     public Report saveReport(String professionalId, String fiscalCode, String date, String description) throws EmergencyException {
-        //TODO: to be implemented
-        return null;
+        if(!professionals.containsKey(professionalId)) throw new EmergencyException();
+        Report r = new Report(professionalId, fiscalCode, date, description);
+        reports.put(r.getId(), r);
+        return r;
     }
 
     /**

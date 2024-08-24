@@ -1,5 +1,7 @@
 package it.polito.emergency;
 
+import java.util.TreeMap;
+
 public class Professional {
 
     private String id;
@@ -9,6 +11,7 @@ public class Professional {
     private Integer startPeriod;
     private Integer endPeriod;
     private String periodStr;
+    private TreeMap<String, Patient> patientsAssigned = new TreeMap<>();
 
     public Professional(String id, String name, String surname, String specialization, String periodStr) {
         this.id = id;
@@ -72,6 +75,27 @@ public class Professional {
         return false;
 
     }
+
+    public Boolean isInService2(String period){
+
+        String[] first = period.split("-");
+        String endS = first[0]+first[1]+first[2];
+        Integer fin = Integer.parseInt(endS);
+
+        if(this.startPeriod<=fin && this.endPeriod>=fin) return true;
+        return false;
+
+    }
+
+    public TreeMap<String, Patient> getPatientsAssigned() {
+        return patientsAssigned;
+    }
+
+    public void addPatient(Patient p){
+        patientsAssigned.put(p.getFiscalCode(), p);
+    }
+
+    
 
     
 }
