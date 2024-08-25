@@ -261,8 +261,7 @@ public class EmergencyApp {
      * @return The total number of patients in the system.
      */    
     public int getNumberOfPatients() {
-        //TODO: to be implemented
-        return -1;
+        return (int)patients.values().stream().filter(p->p.getStatus()==PatientStatus.ADMITTED).count();
     }
 
     /**
@@ -272,13 +271,13 @@ public class EmergencyApp {
      * @return The count of patients admitted on that date.
      */
     public int getNumberOfPatientsByDate(String date) {
-        //TODO: to be implemented
-        return -1;
+        return (int)patients.values().stream().filter(p->p.getDateTimeAccepted().equals(date)).count();
     }
 
     public int getNumberOfPatientsHospitalizedByDepartment(String departmentName) throws EmergencyException {
-        //TODO: to be implemented
-        return -1;
+        if(!departments.containsKey(departmentName)) throw new EmergencyException();
+        
+        return (int)departments.get(departmentName).getPatientsHospitalized().size();
     }
 
     /**
@@ -287,8 +286,7 @@ public class EmergencyApp {
      * @return The count of discharged patients.
      */
     public int getNumberOfPatientsDischarged() {
-        //TODO: to be implemented
-        return -1;
+        return (int)patients.values().stream().filter(p->p.getStatus()==PatientStatus.DISCHARGED).count();
     }
 
     /**
@@ -298,7 +296,7 @@ public class EmergencyApp {
      * @return The count of discharged patients treated by professionals of the given specialization.
      */
     public int getNumberOfPatientsAssignedToProfessionalDischarged(String specialization) {
-        //TODO: to be implemented
-        return -1;
+        return (int)reports.values().stream().filter(r->patients.get(r.getFiscalCode()).getStatus()==PatientStatus.DISCHARGED)
+        .filter(r->professionals.get(r.getProfessionalId()).getSpecialization().equals(specialization)).count();
     }
 }
