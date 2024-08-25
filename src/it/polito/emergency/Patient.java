@@ -56,7 +56,7 @@ public class Patient {
     }
 
     public PatientStatus getStatus() {
-        return null;
+        return status;
     }
 
     public void setStatus(PatientStatus s){

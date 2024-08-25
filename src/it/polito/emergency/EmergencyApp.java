@@ -6,7 +6,6 @@ import java.io.Reader;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class EmergencyApp {
@@ -229,7 +228,15 @@ public class EmergencyApp {
      * @throws EmergencyException If the patient does not exist or if the department does not exist.
      */
     public void dischargeOrHospitalize(String fiscalCode, String departmentName) throws EmergencyException {
-        //TODO: to be implemented
+        if(!patients.containsKey(fiscalCode)) throw new EmergencyException();
+        if(!departments.containsKey(departmentName)) throw new EmergencyException();
+
+        if(departments.get(departmentName).getPatientsHospitalized().size()< departments.get(departmentName).getMaxPatients()){
+            departments.get(departmentName).addPatient(patients.get(fiscalCode));
+            patients.get(fiscalCode).setStatus(PatientStatus.HOSPITALIZED);
+            return;
+        }
+        patients.get(fiscalCode).setStatus(PatientStatus.DISCHARGED);
     }
 
     /**
@@ -240,7 +247,11 @@ public class EmergencyApp {
      * @throws EmergencyException If no patient is found with the given fiscal code.
      */
     public int verifyPatient(String fiscalCode) throws EmergencyException{
-        //TODO: to be implemented
+        if(!patients.containsKey(fiscalCode)) throw new EmergencyException();
+
+        if(patients.get(fiscalCode).getStatus()==PatientStatus.DISCHARGED) return 0;
+        if(patients.get(fiscalCode).getStatus()==PatientStatus.HOSPITALIZED) return 1;
+
         return -1;
     }
 
